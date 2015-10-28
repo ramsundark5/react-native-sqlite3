@@ -1,0 +1,9 @@
+source 'https://github.com/CocoaPods/Specs.git'
+use_frameworks!
+
+
+target 'react-native-sqlite3_Tests', :exclusive => true do
+  pod "react-native-sqlite3", :path => "../"
+
+  
+end
