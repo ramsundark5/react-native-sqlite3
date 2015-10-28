@@ -1,29 +1,28 @@
 # react-native-sqlite3
 
-[![CI Status](http://img.shields.io/travis/Ramsundar Kuppusamy/react-native-sqlite3.svg?style=flat)](https://travis-ci.org/Ramsundar Kuppusamy/react-native-sqlite3)
-[![Version](https://img.shields.io/cocoapods/v/react-native-sqlite3.svg?style=flat)](http://cocoapods.org/pods/react-native-sqlite3)
-[![License](https://img.shields.io/cocoapods/l/react-native-sqlite3.svg?style=flat)](http://cocoapods.org/pods/react-native-sqlite3)
-[![Platform](https://img.shields.io/cocoapods/p/react-native-sqlite3.svg?style=flat)](http://cocoapods.org/pods/react-native-sqlite3)
+ React native wrapper for sqlite3 using FMDB. Currently only limited FMDB commands are exposed.
 
-## Usage
+ ## Getting Started
 
-To run the example project, clone the repo, and run `pod install` from the Example directory first.
+ First, `cd` to your RN project directory, run the command `npm install react-native-sqlite3 --save`.
 
-## Requirements
+ #### iOS: Using [CocoaPods](https://cocoapods.org)
 
-## Installation
+ Assuming you have [CocoaPods](https://cocoapods.org) installed, create a `PodFile` like this in your app's project directory. You can leave out the modules you don't need.
 
-react-native-sqlite3 is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
+ ```ruby
+ xcodeproj 'path/to/YourProject.xcodeproj/'
 
-```ruby
-pod "react-native-sqlite3"
-```
+ pod 'React', :subspecs => ['Core', 'RCTText', 'RCTWebSocket'], :path => 'node_modules/react-native'
+ pod 'react-native-sqlite3', :path => 'node_modules/react-native-sqlite3'
 
-## Author
+ post_install do |installer|
+   target = installer.pods_project.targets.select{|t| 'React' == t.name}.first
+   phase = target.new_shell_script_build_phase('Run Script')
+   phase.shell_script = "if nc -w 5 -z localhost 8081 ; then\n  if ! curl -s \"http://localhost:8081/status\" | grep -q \"packager-status:running\" ; then\n    echo \"Port 8081 already in use, packager is either not running or not running correctly\"\n    exit 2\n  fi\nelse\n  open $SRCROOT/../node_modules/react-native/packager/launchPackager.command || echo \"Can't start packager automatically\"\nfi"
+ end
+ ```
 
-Ramsundar Kuppusamy, ramsundark5@gmail.com
+ Now run `pod install`. This will create an Xcode workspace containing all necessary native files, including react-native-sqlite3. From now on open `YourProject.xcworkspace` instead of `YourProject.xcodeproject` in Xcode. Because React Native's iOS code is now pulled in via CocoaPods, you also need to remove the `React`, `RCTImage`, etc. subprojects from your app's Xcode project, in case they were added previously.
 
-## License
-
-react-native-sqlite3 is available under the MIT license. See the LICENSE file for more info.
+ ## Usage

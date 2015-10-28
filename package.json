@@ -1,0 +1,28 @@
+{
+  "name": "react-native-sqlite3",
+  "version": "0.1.0",
+  "description": "SQlite3 binding for react native based on FMDB.",
+  "main": "index.ios.js",
+  "scripts": {
+    "start": "exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ramsundark5/react-native-sqlite3.git"
+  },
+  "keywords": [
+    "react-component",
+    "reactnative",
+    "react-native",
+    "sqlite3",
+    "sqlite",
+    "FMDB",
+    "ios"
+  ],
+  "author": "Ram Kuppusamy",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ramsundark5/react-native-sqlite3/issues"
+  },
+  "homepage": "https://github.com/ramsundark5/react-native-sqlite3"
+}
