@@ -9,7 +9,10 @@
 ### Getting Started
 
  First, `cd` to your RN project directory, run the command `npm install react-native-sqlite3 --save`.
-
+ 
+ Add libsqlite3.tbd(for newer xcode version) or libsqlite.dylib(for older version of xcode). To add go to 
+ `Build Phases tab` -> Expand the `Link Binary With Libraries` and click the + button to add libsqlite3.tbd or libsqlite3.dylib.
+ 
 #### iOS: Using [CocoaPods](https://cocoapods.org)
 
  Assuming you have [CocoaPods](https://cocoapods.org) installed, create a `PodFile` like this in your app's project directory. You can leave out the modules you don't need.
@@ -28,6 +31,14 @@
  ```
 
  Now run `pod install`. This will create an Xcode workspace containing all necessary native files, including react-native-sqlite3. From now on open `YourProject.xcworkspace` instead of `YourProject.xcodeproject` in Xcode. Because React Native's iOS code is now pulled in via CocoaPods, you also need to remove the `React`, `RCTImage`, etc. subprojects from your app's Xcode project, in case they were added previously.
+
+#### iOS: Manual install(not tested yet- please let me know if you run into any issues)
+
+1. Add FMDB to your project as describe here http://stackoverflow.com/a/11441518/3371160
+2. Open up your project in xcode and right click the package.
+3. Click Add files to 'Your project name'
+4. Navigate to /node_modules/react-native-sqlite3/iOS/RNSqlite
+5. Click 'Add'
 
 ***Example Usage:***
 
