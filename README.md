@@ -8,10 +8,11 @@
  
 ### Getting Started
 
- First, `cd` to your RN project directory, run the command `npm install react-native-sqlite3 --save`.
- 
- Add libsqlite3.tbd(for newer xcode version) or libsqlite.dylib(for older version of xcode). To add go to 
- `Build Phases tab` -> Expand the `Link Binary With Libraries` and click the + button to add libsqlite3.tbd or libsqlite3.dylib.
+ 1. First, `cd` to your RN project directory
+ 2. Run the command `npm install react-native-sqlite3 --save`.
+ 4. Go to  `Build Phases tab` -> Expand the `Link Binary With Libraries` 
+    and click the + button to add 
+    libsqlite3.tbd(for newer xcode version) or libsqlite3.dylib(for older version of xcode). 
  
 #### iOS: Using [CocoaPods](https://cocoapods.org)
 
