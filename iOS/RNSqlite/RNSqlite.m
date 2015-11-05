@@ -16,20 +16,20 @@ RCT_EXPORT_METHOD(initDB:(NSString *)dbName
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    
-    @try {
-        NSString* dbPath = [self getDBPath:dbName];
-        FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
-        [queue inDatabase:^(FMDatabase *db) {
-            BOOL status = [db open];
-            NSString * statusString = (status) ? @"True" : @"False";
+    NSString* dbPath = [self getDBPath:dbName];
+    FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
+    [queue inDatabase:^(FMDatabase *db) {
+        BOOL status = [db open];
+        NSString * statusString = (status) ? @"True" : @"False";
+        NSError* error = [db lastError];
+        if(error){
+            NSLog(@"%@", error.localizedDescription);
+            reject(error);
+        }else{
             resolve(statusString);
-        }];
-    }
-    @catch (NSError *error) {
-        NSLog(@"%@", error.localizedDescription);
-        reject(error);
-    }
+        }
+    }];
+    
 }
 
 /*RCT_EXPORT_METHOD(executeBatchUpdate:(NSString *)dbName
@@ -55,14 +55,19 @@ RCT_EXPORT_METHOD(executeInsert:(NSString *)dbName
                   params:(NSDictionary *) params
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-    @try {
-        NSInteger lastInsertRowid  = [self executeInsertInternal:dbName sqlStmt:sqlStmt params:params];
-        NSNumber *lastRowIdResponse = [NSNumber numberWithInteger: lastInsertRowid];
-        resolve(lastRowIdResponse);
-    }
-    @catch (NSError *error) {
+    
+    NSError* error = nil;
+    NSInteger lastInsertRowid  = [self executeInsertInternal:dbName
+                                                     sqlStmt:sqlStmt
+                                                      params:params
+                                                      error:error];
+
+    if(error){
         NSLog(@"%@", error.localizedDescription);
         reject(error);
+    }else{
+        NSNumber *lastRowIdResponse = [NSNumber numberWithInteger: lastInsertRowid];
+        resolve(lastRowIdResponse);
     }
 }
 
@@ -71,14 +76,17 @@ RCT_EXPORT_METHOD(executeUpdate:(NSString *)dbName
                   params:(NSDictionary *) params
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-    @try {
-        BOOL status = [self executeUpdateInternal:dbName sqlStmt:sqlStmt params:params];
-        NSString * statusString = (status) ? @"True" : @"False";
-        resolve(statusString);
-    }
-    @catch (NSError *error) {
+    NSError* error = nil;
+    BOOL status = [self executeUpdateInternal:dbName
+                                      sqlStmt:sqlStmt
+                                       params:params
+                                       error:error];
+    if(error){
         NSLog(@"%@", error.localizedDescription);
         reject(error);
+    }else{
+        NSString * statusString = (status) ? @"True" : @"False";
+        resolve(statusString);
     }
 }
 
@@ -87,14 +95,19 @@ RCT_EXPORT_METHOD(executeQuery:(NSString *)dbName
                   params:(NSDictionary *) params
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-    @try {
-        NSArray *results = [self executeQueryInternal:dbName sqlStmt:sqlStmt params:params];
-        resolve(results);
-    }
-    @catch (NSError *error) {
+    NSError* error = nil;
+    NSArray *results = [self executeQueryInternal:dbName
+                                          sqlStmt:sqlStmt
+                                           params:params
+                                           error:error];
+    
+    if(error){
         NSLog(@"%@", error.localizedDescription);
         reject(error);
+    }else{
+        resolve(results);
     }
+
 }
 
 RCT_EXPORT_METHOD(close:(NSString *)dbName
@@ -103,60 +116,71 @@ RCT_EXPORT_METHOD(close:(NSString *)dbName
 
     NSString* dbPath = [self getDBPath:dbName];
     FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
-
+    __block NSError* error = nil;
     [queue inDatabase:^(FMDatabase *db) {
         [db close];
+        error = [db lastError];
     }];
-
-    resolve(@"True");
+    if(error){
+        reject(error);
+    }else{
+        resolve(@"DB Closed");
+    }
 }
 
 -(NSInteger) executeInsertInternal:(NSString *)dbName
                            sqlStmt:(NSString *)sqlStmt
-                            params:(NSDictionary *) params{
+                            params:(NSDictionary *)params
+                            error:(NSError*)error{
     NSString* dbPath = [self getDBPath:dbName];
     FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
     __block NSInteger lastId = 0;
-    
+    __block NSError* tempError = nil;
     [queue inDatabase:^(FMDatabase *db) {
         BOOL status = [db executeUpdate:sqlStmt withParameterDictionary:params];
         if(status){
             lastId = [db lastInsertRowId];
         }
+        tempError = [db lastError];
     }];
-    
+    error = tempError;
     return lastId;
 }
 
 -(BOOL) executeUpdateInternal:(NSString *)dbName
                       sqlStmt:(NSString *)sqlStmt
-                       params:(NSDictionary *) params{
+                       params:(NSDictionary *)params
+                       error:(NSError*)error{
     NSString* dbPath = [self getDBPath:dbName];
+    __block NSError* tempError = nil;
     FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
     __block BOOL status = FALSE;
     
     [queue inDatabase:^(FMDatabase *db) {
         status = [db executeUpdate:sqlStmt withParameterDictionary:params];
+        tempError = [db lastError];
     }];
-    
+    error = tempError;
     return status;
 }
 
 -(NSArray*) executeQueryInternal:(NSString *)dbName
                          sqlStmt:(NSString *)sqlStmt
-                          params:(NSDictionary *) params{
+                          params:(NSDictionary *)params
+                          error:(NSError*)error{
     NSString* dbPath = [self getDBPath:dbName];
     NSMutableArray *results = [NSMutableArray array];
     FMDatabaseQueue *queue = [FMDatabaseQueue databaseQueueWithPath:dbPath];
-    
+    __block NSError* tempError = nil;
     [queue inDatabase:^(FMDatabase *db) {
         FMResultSet *rs = [db executeQuery:sqlStmt withParameterDictionary:params];
         while ([rs next]) {
             [results addObject:[rs resultDictionary]];
         }
         [rs close];
+         tempError = [db lastError];
     }];
-    
+    error = tempError;
     return results;
 }
 
@@ -171,4 +195,5 @@ RCT_EXPORT_METHOD(close:(NSString *)dbName
     //NSLog(@"DB path is%@", dbPath);
     return dbPath;
 }
+
 @end
