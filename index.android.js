@@ -10,7 +10,7 @@ class RNSqlite{
         return new Promise((resolve, reject) => {
             DBManager.initDB(dbname, function(errors, result) {
                 if (errors) {
-                    reject(this._convertError(errors[0]));
+                    reject(this._convertError(errors));
                 } else {
                     resolve(result)
                 }
@@ -18,12 +18,12 @@ class RNSqlite{
         });
     }
 
-    executeInsert(sql, paramsMap){
+    executeInsert(dbname, sql, paramsMap){
         let paramsArray = this._convertToParamsArray(sql, paramsMap);
         return new Promise((resolve, reject) => {
-            DBManager.executeInsert(sql, paramsArray, function(errors, result) {
+            DBManager.executeInsert(dbname, sql, paramsArray, function(errors, result) {
                 if (errors) {
-                    reject(this._convertError(errors[0]));
+                    reject(this._convertError(errors));
                 } else {
                     resolve(result)
                 }
@@ -31,12 +31,12 @@ class RNSqlite{
         });
     }
 
-    executeQuery(sql, paramsMap){
-        let paramsArray = this._convertToParamsArray(paramsMap);
+    executeQuery(dbname, sql, paramsMap){
+        let paramsArray = this._convertToParamsArray(sql, paramsMap);
         return new Promise((resolve, reject) => {
-            DBManager.executeQuery(dbName, sql, paramsArray, function(errors, result) {
+            DBManager.executeQuery(dbname, sql, paramsArray, function(errors, result) {
                 if (errors) {
-                    reject(this._convertError(errors[0]));
+                    reject(this._convertError(errors));
                 } else {
                     resolve(result)
                 }
@@ -44,12 +44,12 @@ class RNSqlite{
         });
     }
 
-    executeUpdate(sql, paramsMap){
-        let paramsArray = this._convertToParamsArray(paramsMap);
+    executeUpdate(dbname, sql, paramsMap){
+        let paramsArray = this._convertToParamsArray(sql, paramsMap);
         return new Promise((resolve, reject) => {
-            DBManager.executeUpdate(sql, paramsArray, function(errors, result) {
+            DBManager.executeUpdate(dbname, sql, paramsArray, function(errors, result) {
                 if (errors) {
-                    reject(this._convertError(errors[0]));
+                    reject(this._convertError(errors));
                 } else {
                     resolve(result)
                 }
@@ -57,16 +57,21 @@ class RNSqlite{
         });
     }
 
-    _convertError(error) {
-        if (!error) {
+    _convertError(errors) {
+        if (!errors) {
             return null;
         }
-        var out = new Error(error.message);
-        out.key = error.key; // flow doesn't like this :(
-        return out;
+        //var out = new Error(error.message);
+        //out.key = error.key; // flow doesn't like this :(
+        //return out;
+        console.log("error executing sqlite statement "+ errors);
+        return errors;
     }
 
     _convertToParamsArray(sql, paramsMap){
+        if(!paramsMap){
+            return [];
+        }
         //we use :columnName as convention in sql statement
         let columnNames = sql.match(/:\w+/g);
         let paramsArray = [];
